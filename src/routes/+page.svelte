@@ -8,14 +8,14 @@
 
 <div class="landing">
 	<div class="hero">
-		<img src="{base}/Logo.svg" alt="Rust Nation UK" class="hero-logo" />
+		<img src="{base}/crab.svg" alt="Ferris the Rust crab" class="hero-crab" />
 		<p class="hero-tagline">The UK's premier Rust conference</p>
 	</div>
 
 	<nav class="landing-nav" aria-label="Main sections">
 		<a href="{base}/schedule" class="landing-card landing-card--schedule">
 			<div class="card-icon" aria-hidden="true">
-				<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
 					<line x1="16" y1="2" x2="16" y2="6"/>
 					<line x1="8" y1="2" x2="8" y2="6"/>
@@ -28,7 +28,7 @@
 
 		<a href="{base}/sponsors" class="landing-card landing-card--sponsors">
 			<div class="card-icon" aria-hidden="true">
-				<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
 				</svg>
 			</div>
@@ -60,11 +60,25 @@
 		margin-bottom: var(--space-2xl);
 	}
 
-	.hero-logo {
-		width: 200px;
+	.hero-crab {
+		width: 160px;
 		max-width: 100%;
 		height: auto;
 		margin: 0 auto var(--space-lg);
+		animation: crab-float 3s ease-in-out infinite;
+		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+	}
+
+	@keyframes crab-float {
+		0%, 100% {
+			transform: translateY(0) rotate(0deg);
+		}
+		25% {
+			transform: translateY(-6px) rotate(1deg);
+		}
+		75% {
+			transform: translateY(-6px) rotate(-1deg);
+		}
 	}
 
 	.hero-tagline {
@@ -103,8 +117,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 80px;
-		height: 80px;
+		width: 56px;
+		height: 56px;
 		border-radius: var(--radius-full);
 		margin-bottom: var(--space-md);
 	}
@@ -133,8 +147,8 @@
 	}
 
 	@media (min-width: 768px) {
-		.hero-logo {
-			width: 280px;
+		.hero-crab {
+			width: 200px;
 		}
 
 		.hero-tagline {
