@@ -51,10 +51,9 @@ This document tracks all functional issues identified for the Rust Nation UK con
 
 ### 8. Double Sticky Headers Taking Too Much Space on Mobile
 - **Status:** Fixed
-- Reduced header padding on mobile (from 1rem to 0.5rem)
-- Reduced logo height on mobile (from 32px to 24px)
-- Reduced nav link size and padding
-- Updated TrackSelector sticky position accordingly
+- Removed sticky positioning from main header entirely
+- Only track selector is now sticky (sticks to top of viewport)
+- Gives more vertical space when scrolling through schedule
 
 ### 9. Color Contrast Issues
 - **Status:** Fixed
