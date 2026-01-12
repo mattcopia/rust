@@ -280,6 +280,7 @@
 		border-radius: var(--radius-md);
 		font-size: var(--text-sm);
 		background: var(--color-gray-100);
+		color: var(--color-text);
 		transition: all var(--transition-fast);
 	}
 
@@ -302,8 +303,8 @@
 		font-size: var(--text-xs);
 		font-weight: 500;
 		text-transform: capitalize;
-		color: var(--color-gray-600);
-		background: var(--color-white);
+		color: var(--color-text-muted);
+		background: var(--color-surface);
 		transition: all var(--transition-fast);
 	}
 
