@@ -51,7 +51,7 @@
 <style>
 	.track-selector-wrapper {
 		position: sticky;
-		top: 40px;
+		top: 0;
 		z-index: 90;
 		background:
 			linear-gradient(225deg, transparent 85%, rgba(132, 26, 242, 0.3) 85%, rgba(132, 26, 242, 0.3) 95%, transparent 95%),
@@ -165,7 +165,7 @@
 	
 	@media (min-width: 768px) {
 		.track-selector-wrapper {
-			top: 60px;
+			top: 0;
 		}
 
 		.track-selector {
