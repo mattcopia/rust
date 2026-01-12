@@ -12,16 +12,16 @@ This document tracks all functional issues identified for the Rust Nation UK con
 - Consider PWA manifest for install capability
 - Cache static assets and JSON data for offline viewing
 
-### 7. No Keyboard Navigation for Track Selector
-- Track tabs lack arrow key navigation
-- Should support Left/Right arrow keys to move between tabs
-- Enter/Space to select focused tab
-- Home/End keys to jump to first/last tab
-- Add proper `tabindex` and focus management
-
 ---
 
 ## Fixed Issues
+
+### 7. No Keyboard Navigation for Track Selector
+- **Status:** Fixed
+- Arrow Left/Right to move between tabs (with wrap-around)
+- Home/End to jump to first/last tab
+- Proper `tabindex` management (only active tab in tab order)
+- Focus moves with selection
 
 ### 5. No Error Boundaries
 - **Status:** Fixed

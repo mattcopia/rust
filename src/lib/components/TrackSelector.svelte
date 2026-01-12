@@ -14,6 +14,7 @@
 
 	let { tracks, selectedTrack, onSelect }: Props = $props();
 	let hasAnimated = $state(false);
+	let tabRefs: HTMLButtonElement[] = [];
 
 	onMount(() => {
 		// Trigger entrance animation after mount
@@ -21,19 +22,55 @@
 			hasAnimated = true;
 		}, 100);
 	});
+
+	function handleKeyDown(event: KeyboardEvent, index: number) {
+		let newIndex = index;
+
+		switch (event.key) {
+			case 'ArrowLeft':
+				event.preventDefault();
+				newIndex = index > 0 ? index - 1 : tracks.length - 1;
+				break;
+			case 'ArrowRight':
+				event.preventDefault();
+				newIndex = index < tracks.length - 1 ? index + 1 : 0;
+				break;
+			case 'Home':
+				event.preventDefault();
+				newIndex = 0;
+				break;
+			case 'End':
+				event.preventDefault();
+				newIndex = tracks.length - 1;
+				break;
+			default:
+				return;
+		}
+
+		// Focus and select the new tab
+		tabRefs[newIndex]?.focus();
+		onSelect(tracks[newIndex].id);
+	}
+
+	function getTabIndex(trackId: number): number {
+		return selectedTrack === trackId ? 0 : -1;
+	}
 </script>
 
 <div class="track-selector-wrapper" class:animated={hasAnimated}>
 	<div class="track-selector" role="tablist" aria-label="Conference tracks">
 		{#each tracks as track, i (track.id)}
 			<button
+				bind:this={tabRefs[i]}
 				class="track-tab"
 				class:active={selectedTrack === track.id}
 				class:pulse={hasAnimated && selectedTrack === track.id}
 				role="tab"
+				tabindex={getTabIndex(track.id)}
 				aria-selected={selectedTrack === track.id}
 				aria-controls="track-panel-{track.id}"
 				onclick={() => onSelect(track.id)}
+				onkeydown={(e) => handleKeyDown(e, i)}
 				style="--delay: {i * 0.1}s"
 			>
 				{track.name}
