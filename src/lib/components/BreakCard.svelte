@@ -31,9 +31,9 @@
 		align-items: center;
 		gap: var(--space-md);
 		padding: var(--space-md) var(--space-lg);
-		background: var(--color-yellow);
+		background: var(--color-green);
 		border-radius: var(--radius-lg);
-		color: var(--color-black);
+		color: var(--color-white);
 	}
 
 	.break-icon {
