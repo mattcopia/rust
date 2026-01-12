@@ -63,11 +63,11 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: var(--space-sm) var(--space-md);
+		padding: var(--space-sm) var(--space-lg);
 		border-radius: var(--radius-full);
 		color: var(--color-text-on-primary);
-		font-weight: 500;
-		font-size: var(--text-base);
+		font-weight: 600;
+		font-size: var(--text-lg);
 		line-height: 1;
 		transition: background var(--transition-fast);
 	}

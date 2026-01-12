@@ -29,29 +29,30 @@
 	.break-card {
 		display: flex;
 		align-items: center;
-		gap: var(--space-md);
-		padding: var(--space-md) var(--space-lg);
+		gap: var(--space-sm);
+		padding: var(--space-sm) var(--space-md);
 		background: var(--color-green);
-		border-radius: var(--radius-lg);
+		border-radius: var(--radius-md);
 		color: var(--color-white);
 	}
 
 	.break-icon {
-		font-size: var(--text-xl);
+		font-size: var(--text-base);
 	}
 
 	.break-time {
 		font-weight: 700;
-		font-size: var(--text-base);
+		font-size: var(--text-sm);
 	}
 
 	.break-label {
 		flex: 1;
 		font-weight: 500;
+		font-size: var(--text-sm);
 	}
 
 	.break-duration {
-		font-size: var(--text-sm);
-		opacity: 0.7;
+		font-size: var(--text-xs);
+		opacity: 0.8;
 	}
 </style>
