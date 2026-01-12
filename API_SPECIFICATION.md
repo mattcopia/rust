@@ -113,7 +113,9 @@ This document outlines the data structure required from the API to power the Rus
       "tier": "platinum",
       "logo": "https://example.com/logos/ferrous.svg",
       "website": "https://ferrous-systems.com",
-      "bio": "Ferrous Systems is a Rust consultancy founded by members of the Rust project..."
+      "bio": "Ferrous Systems is a Rust consultancy founded by members of the Rust project...",
+      "ad": true,
+      "adMessage": "World-class Rust training and consulting"
     }
   ]
 }
@@ -127,13 +129,16 @@ This document outlines the data structure required from the API to power the Rus
 | `logo` | string | Yes | URL to logo image (transparent PNG/SVG recommended) |
 | `website` | string | Yes | Full URL to sponsor website |
 | `bio` | string | Yes | Company description |
+| `ad` | boolean | Yes | Whether this sponsor has a popup ad |
+| `adMessage` | string | No | Short tagline for ad (required if `ad` is true, max 50 chars) |
 
 ---
 
 ## 5. Sponsor Ads (Toast Popups)
 
-These are shown as timed popups on the schedule page.
+These are shown as timed popups on the schedule page. Ads are derived from sponsors where `ad: true`.
 
+**Option A: Separate ads endpoint**
 ```json
 {
   "ads": [
@@ -148,6 +153,10 @@ These are shown as timed popups on the schedule page.
   ]
 }
 ```
+
+**Option B: Filtered from sponsors**
+
+The app can filter sponsors where `ad: true` and use their `adMessage` field. This avoids duplicating data.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
