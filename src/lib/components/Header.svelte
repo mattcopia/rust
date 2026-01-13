@@ -66,7 +66,7 @@
 		justify-content: center;
 		padding: var(--space-sm) var(--space-lg);
 		border-radius: var(--radius-full);
-		color: var(--color-text-on-primary);
+		color: var(--color-text-light);
 		font-weight: 600;
 		font-size: var(--text-lg);
 		line-height: 1;
