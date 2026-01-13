@@ -77,13 +77,13 @@
 	.sponsors-title {
 		font-size: var(--text-2xl);
 		font-weight: 700;
-		color: var(--color-text-on-primary);
+		color: var(--color-text-light);
 		margin-bottom: var(--space-xs);
 	}
 
 	.sponsors-subtitle {
 		font-size: var(--text-base);
-		color: var(--color-text-on-primary);
+		color: var(--color-text-light);
 		opacity: 0.9;
 	}
 
