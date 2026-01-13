@@ -149,7 +149,7 @@
 	.track-tab.active {
 		opacity: 1 !important;
 		background: var(--color-yellow);
-		color: var(--color-black);
+		color: #1a1a1a; /* Always dark on yellow for contrast */
 		font-weight: 700;
 	}
 
