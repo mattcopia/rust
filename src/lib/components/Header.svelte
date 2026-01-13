@@ -83,6 +83,12 @@
 		color: var(--color-primary);
 	}
 
+	@media (prefers-color-scheme: dark) {
+		.nav-link.active {
+			color: var(--color-text-light);
+		}
+	}
+
 	@media (min-width: 768px) {
 		.header {
 			padding: var(--space-md) var(--space-xl);
