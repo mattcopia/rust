@@ -152,6 +152,13 @@
 		overflow: hidden;
 		max-width: 500px;
 		margin: 0 auto;
+		border: 1px solid var(--color-primary);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.toast {
+			border-color: var(--color-yellow);
+		}
 	}
 
 	.progress-bar {
