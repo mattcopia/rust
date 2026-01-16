@@ -162,9 +162,11 @@
 		<div
 			class="modal-backdrop"
 			onclick={handleBackdropClick}
+			onkeydown={(e) => e.key === 'Escape' && collapseAd()}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="sponsor-modal-title"
+			tabindex="-1"
 		>
 			<div class="modal">
 				<button

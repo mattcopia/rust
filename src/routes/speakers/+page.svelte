@@ -27,7 +27,7 @@
 	let searchQuery = $state('');
 	let selectedCompany = $state('');
 
-	let filteredSpeakers = $derived(() => {
+	let filteredSpeakers = $derived.by(() => {
 		let result = [...speakers];
 
 		// Filter by search query
@@ -112,12 +112,12 @@
 		</div>
 
 		<div class="results-count" aria-live="polite">
-			{filteredSpeakers().length} speaker{filteredSpeakers().length !== 1 ? 's' : ''}
+			{filteredSpeakers.length} speaker{filteredSpeakers.length !== 1 ? 's' : ''}
 		</div>
 
-		{#if filteredSpeakers().length > 0}
+		{#if filteredSpeakers.length > 0}
 			<div class="speakers-grid">
-				{#each filteredSpeakers() as speaker (speaker.id)}
+				{#each filteredSpeakers as speaker (speaker.id)}
 					<SpeakerCard {speaker} />
 				{/each}
 			</div>
