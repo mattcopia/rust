@@ -121,7 +121,7 @@
 	{#if !expanded}
 		<div class="toast-container" role="region" aria-label="Sponsor message">
 			<div class="sr-only" aria-live="polite" aria-atomic="true">
-				Sponsored by {currentAd.name}: {currentAd.message}
+				{currentAd.message}. {currentAd.name}, {currentAd.tier} sponsor.
 			</div>
 			<div
 				class="toast"
@@ -136,12 +136,9 @@
 				<img src={currentAd.logo} alt="{currentAd.name} logo" class="sponsor-logo" />
 
 				<div class="toast-content">
-					<div class="sponsor-header">
-						<span class="sponsor-label">Sponsored by</span>
-						<span class="sponsor-tier tier--{currentAd.tier}">{currentAd.tier}</span>
-					</div>
-					<span class="sponsor-name">{currentAd.name}</span>
 					<span class="sponsor-message">{currentAd.message}</span>
+					<span class="sponsor-name">{currentAd.name}</span>
+					<span class="sponsor-tier tier--{currentAd.tier}">{currentAd.tier} sponsor</span>
 				</div>
 
 				<button
