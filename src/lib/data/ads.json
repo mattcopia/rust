@@ -1,6 +1,17 @@
 {
   "ads": [
     {
+      "id": 3,
+      "name": "Helsing",
+      "tier": "Delegate Lounge Sponsor",
+      "logo": "/helsing-logo-light.png",
+      "logoDark": "/helsing-logo-dark.png",
+      "message": "Oxidising European Defence",
+      "image": "/helsing-ad-image.png",
+      "fullMessage": "Helsing is a defence AI company with a mission to protect our democracies.\n\nWe believe we have a responsibility to be thoughtful about the development and deployment of powerful technologies.\n\nWe are proud of the world-class team we have built from diverse backgrounds, combining deep experience in defence, artificial intelligence and software engineering.\n\nJoin our European teams.\n\nApply your Rust skills to solve complex, high-stakes problems that matter most.",
+      "url": "https://helsing.ai/rust-nation"
+    },
+    {
       "id": 1,
       "name": "Ferrous Systems",
       "tier": "platinum",
@@ -15,17 +26,6 @@
       "logo": "https://placehold.co/100x100/FF9900/000000?text=AWS",
       "message": "Build with Rust on AWS Lambda",
       "url": "https://aws.amazon.com"
-    },
-    {
-      "id": 3,
-      "name": "Helsing",
-      "tier": "Delegate Lounge Sponsor",
-      "logo": "/helsing-logo-light.png",
-      "logoDark": "/helsing-logo-dark.png",
-      "message": "Oxidising European Defence",
-      "image": "/helsing-ad-image.png",
-      "fullMessage": "Helsing is a defence AI company with a mission to protect our democracies.\n\nWe believe we have a responsibility to be thoughtful about the development and deployment of powerful technologies.\n\nWe are proud of the world-class team we have built from diverse backgrounds, combining deep experience in defence, artificial intelligence and software engineering.\n\nJoin our European teams.\n\nApply your Rust skills to solve complex, high-stakes problems that matter most.",
-      "url": "https://helsing.ai/rust-nation"
     }
   ]
 }
