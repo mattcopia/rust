@@ -3,7 +3,7 @@
 	import { base } from '$app/paths';
 
 	interface SponsorAd {
-		id: number;
+		id: string | number;
 		name: string;
 		tier: string;
 		logo: string;
@@ -28,7 +28,6 @@
 	let expanded = $state(false);
 	let progress = $state(0);
 	let dismissed = $state(false);
-	let isDarkMode = $state(false);
 
 	let progressInterval: ReturnType<typeof setInterval>;
 	let hideTimeout: ReturnType<typeof setTimeout>;
@@ -104,15 +103,6 @@
 	}
 
 	onMount(() => {
-		// Detect dark mode
-		const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-		isDarkMode = darkModeQuery.matches;
-
-		const handleColorSchemeChange = (e: MediaQueryListEvent) => {
-			isDarkMode = e.matches;
-		};
-		darkModeQuery.addEventListener('change', handleColorSchemeChange);
-
 		// Show first ad after a short delay
 		const initialDelay = setTimeout(() => {
 			showAd();
@@ -123,7 +113,6 @@
 			clearInterval(progressInterval);
 			clearTimeout(hideTimeout);
 			clearTimeout(nextAdTimeout);
-			darkModeQuery.removeEventListener('change', handleColorSchemeChange);
 		};
 	});
 
@@ -137,11 +126,8 @@
 		return path;
 	}
 
-	// Get the correct logo based on dark/light mode
+	// Get the logo (always light mode)
 	function getLogo(ad: SponsorAd): string {
-		if (isDarkMode && ad.logoDark) {
-			return resolveAsset(ad.logoDark);
-		}
 		return resolveAsset(ad.logo);
 	}
 </script>
@@ -171,6 +157,12 @@
 					<span class="sponsor-message">{currentAd.message}</span>
 					<span class="sponsor-name">{currentAd.name}</span>
 					<span class="sponsor-tier">{currentAd.tier} sponsor</span>
+					<span class="tap-hint">
+						Tap for details
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+							<polyline points="9 18 15 12 9 6"/>
+						</svg>
+					</span>
 				</div>
 
 				<button
@@ -307,13 +299,18 @@
 		width: 100%;
 		text-align: left;
 		cursor: pointer;
+		transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 	}
 
-	@media (prefers-color-scheme: dark) {
-		.toast {
-			border-color: var(--color-yellow);
-		}
+	.toast:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.2);
 	}
+
+	.toast:active {
+		transform: translateY(0);
+	}
+
 
 	.progress-bar {
 		position: absolute;
@@ -372,6 +369,29 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	.tap-hint {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: var(--text-xs);
+		font-weight: 600;
+		color: var(--color-primary);
+		margin-top: 2px;
+	}
+
+	.tap-hint svg {
+		animation: bounce-right 1s ease-in-out infinite;
+	}
+
+	@keyframes bounce-right {
+		0%, 100% {
+			transform: translateX(0);
+		}
+		50% {
+			transform: translateX(3px);
+		}
 	}
 
 	.close-btn {

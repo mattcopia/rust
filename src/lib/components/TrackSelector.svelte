@@ -2,14 +2,14 @@
 	import { onMount } from 'svelte';
 
 	interface Track {
-		id: number;
+		id: string | number;
 		name: string;
 	}
 
 	interface Props {
 		tracks: Track[];
-		selectedTrack: number;
-		onSelect: (trackId: number) => void;
+		selectedTrack: string | number;
+		onSelect: (trackId: string | number) => void;
 	}
 
 	let { tracks, selectedTrack, onSelect }: Props = $props();

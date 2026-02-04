@@ -8,8 +8,8 @@
 	}
 
 	interface Talk {
-		id: number;
-		track: number;
+		id: string | number;
+		track: string | number;
 		time: string;
 		duration: number;
 		title: string;

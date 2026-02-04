@@ -7,7 +7,7 @@
 	}
 
 	interface Speaker {
-		id: number;
+		id: string | number;
 		name: string;
 		photo?: string;
 		title?: string;
@@ -102,7 +102,7 @@
 				{/if}
 				{#if speaker.social?.linkedin}
 					<a
-						href="https://linkedin.com/in/{speaker.social.linkedin}"
+						href={speaker.social.linkedin.startsWith('http') ? speaker.social.linkedin : `https://linkedin.com/in/${speaker.social.linkedin}`}
 						target="_blank"
 						rel="noopener noreferrer"
 						aria-label="{speaker.name} on LinkedIn"

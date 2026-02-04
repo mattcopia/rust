@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Sponsor {
-		id: number;
+		id: string | number;
 		name: string;
 		tier: string;
 		logo: string;

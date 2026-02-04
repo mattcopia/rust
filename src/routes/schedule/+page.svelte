@@ -7,39 +7,81 @@
 	import scheduleData from '$lib/data/schedule.json';
 	import adsData from '$lib/data/ads.json';
 
-	let selectedTrack = $state(1);
-	let searchQuery = $state('');
-	let selectedTags = $state<string[]>([]);
-	let isLoading = $state(true);
-	let currentTime = $state(new Date());
+	const API_URL = '/api/copia/events/rust-nation-uk-2026';
 
-	const allTags = ['keynote', 'talk', 'tutorial'];
+	// API Types
+	interface ApiSponsor {
+		id: string;
+		name: string;
+		sponsorship_type: string;
+		logo_url: string;
+		has_advert: boolean;
+		advert?: {
+			image_url: string;
+			headline: string;
+			body: string;
+			link_url: string;
+		};
+	}
 
-	// Update current time every minute for "happening now" feature
-	onMount(() => {
-		const interval = setInterval(() => {
-			currentTime = new Date();
-		}, 60000);
-		return () => clearInterval(interval);
-	});
+	interface ApiTrack {
+		id: string;
+		name: string;
+		description: string | null;
+		color: string;
+		room_name: string | null;
+		sort_order: number;
+	}
 
-	// Check if a talk is happening now
-	function isTalkNow(talk: Talk): boolean {
-		const now = currentTime;
-		const [hours, minutes] = talk.time.split(':').map(Number);
+	interface ApiSpeaker {
+		id: string;
+		full_name: string;
+		job_title: string | null;
+		headshot_url: string | null;
+		organisation: string | null;
+		talk_title: string | null;
+		talk_abstract: string | null;
+	}
 
-		const talkStart = new Date(now);
-		talkStart.setHours(hours, minutes, 0, 0);
+	interface ApiSession {
+		id: string;
+		title: string | null;
+		description: string | null;
+		speaker: ApiSpeaker;
+	}
 
-		const talkEnd = new Date(talkStart);
-		talkEnd.setMinutes(talkEnd.getMinutes() + talk.duration);
+	interface ApiSlot {
+		id: string;
+		track_id: string | null;
+		date: string;
+		start_time: string;
+		end_time: string;
+		title: string | null;
+		slot_type: string;
+		is_break: boolean;
+		sessions: ApiSession[];
+	}
 
-		return now >= talkStart && now < talkEnd;
+	// App Types
+	interface Track {
+		id: string | number;
+		name: string;
+	}
+
+	interface SponsorAd {
+		id: string | number;
+		name: string;
+		tier: string;
+		logo: string;
+		message: string;
+		fullMessage?: string;
+		image?: string;
+		url: string;
 	}
 
 	interface Talk {
-		id: number;
-		track: number;
+		id: string | number;
+		track: string | number;
 		time: string;
 		duration: number;
 		title: string;
@@ -67,19 +109,136 @@
 		data: Talk | BreakItem;
 	}
 
-	function getSchedule(trackId: number, query: string, tags: string[]): ScheduleItem[] {
+	// State
+	let selectedTrack = $state<string | number>('');
+	let tracks = $state<Track[]>([]);
+	let talks = $state<Talk[]>([]);
+	let breaks = $state<BreakItem[]>([]);
+	let searchQuery = $state('');
+	let selectedTags = $state<string[]>([]);
+	let isLoading = $state(true);
+	let currentTime = $state(new Date());
+	let sponsorAds = $state<SponsorAd[]>([]);
+
+	const allTags = ['keynote', 'talk', 'tutorial'];
+
+	// Update current time every minute for "happening now" feature
+	onMount(() => {
+		const interval = setInterval(() => {
+			currentTime = new Date();
+		}, 60000);
+		return () => clearInterval(interval);
+	});
+
+	// Check if a talk is happening now
+	function isTalkNow(talk: Talk): boolean {
+		const now = currentTime;
+		const [hours, minutes] = talk.time.split(':').map(Number);
+
+		const talkStart = new Date(now);
+		talkStart.setHours(hours, minutes, 0, 0);
+
+		const talkEnd = new Date(talkStart);
+		talkEnd.setMinutes(talkEnd.getMinutes() + talk.duration);
+
+		return now >= talkStart && now < talkEnd;
+	}
+
+	// Helper to calculate duration in minutes from time strings
+	function calculateDuration(startTime: string, endTime: string): number {
+		const [startH, startM] = startTime.split(':').map(Number);
+		const [endH, endM] = endTime.split(':').map(Number);
+		return (endH * 60 + endM) - (startH * 60 + startM);
+	}
+
+	// Helper to format time from "HH:MM:SS" to "HH:MM"
+	function formatTime(time: string): string {
+		return time.slice(0, 5);
+	}
+
+	// Map slot_type to tag
+	function mapSlotTypeToTag(slotType: string): 'keynote' | 'talk' | 'tutorial' {
+		if (slotType === 'keynote') return 'keynote';
+		if (slotType === 'tutorial') return 'tutorial';
+		return 'talk';
+	}
+
+	// Transform API slots into talks and breaks
+	function transformApiData(slots: ApiSlot[], apiTracks: ApiTrack[]) {
+		const transformedTalks: Talk[] = [];
+		const transformedBreaks: BreakItem[] = [];
+
+		// Get non-tutorial tracks for distributing parallel sessions
+		const mainTracks = apiTracks.filter(t => !t.name.toLowerCase().includes('tutorial'));
+
+		for (const slot of slots) {
+			const time = formatTime(slot.start_time);
+			const duration = calculateDuration(slot.start_time, slot.end_time);
+
+			if (slot.is_break) {
+				transformedBreaks.push({
+					time,
+					duration,
+					type: slot.slot_type,
+					label: slot.title || slot.slot_type.replace('_', ' ')
+				});
+			} else if (slot.sessions && slot.sessions.length > 0) {
+				// Each session in the slot becomes a talk
+				for (let i = 0; i < slot.sessions.length; i++) {
+					const session = slot.sessions[i];
+					let trackId: string;
+
+					if (slot.track_id) {
+						// Slot has explicit track assignment
+						trackId = slot.track_id;
+					} else if (slot.sessions.length > 1 && mainTracks.length > 0) {
+						// Multiple sessions without track_id = parallel sessions
+						// Distribute across main tracks by index
+						trackId = mainTracks[i % mainTracks.length]?.id || mainTracks[0].id;
+					} else if (mainTracks.length > 0) {
+						// Single session (like keynote) - assign to first track
+						trackId = mainTracks[0].id;
+					} else {
+						trackId = apiTracks[0]?.id || '';
+					}
+
+					// Get talk info from speaker object (talk_title/talk_abstract) or fallback to session/slot
+					const talkTitle = session.speaker?.talk_title || session.title || slot.title || 'TBA';
+					const talkAbstract = session.speaker?.talk_abstract || session.description || '';
+					const speakerName = session.speaker?.full_name || 'TBA';
+
+					transformedTalks.push({
+						id: session.id,
+						track: trackId,
+						time,
+						duration,
+						title: talkTitle,
+						speaker: speakerName,
+						speakerPhoto: session.speaker?.headshot_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(speakerName)}&background=780AE9&color=fff&size=200`,
+						synopsis: talkAbstract,
+						tag: mapSlotTypeToTag(slot.slot_type),
+						social: {}
+					});
+				}
+			}
+		}
+
+		return { talks: transformedTalks, breaks: transformedBreaks };
+	}
+
+	function getSchedule(trackId: string | number, query: string, tags: string[]): ScheduleItem[] {
 		const hasFilter = query.trim() !== '' || tags.length > 0;
-		let talks = (scheduleData.talks as Talk[]);
+		let filteredTalks = [...talks];
 
 		// Only filter by track if NOT searching/filtering
-		if (!hasFilter) {
-			talks = talks.filter((talk) => talk.track === trackId);
+		if (!hasFilter && trackId) {
+			filteredTalks = filteredTalks.filter((talk) => talk.track === trackId);
 		}
 
 		// Apply search filter
 		if (query.trim()) {
 			const q = query.toLowerCase();
-			talks = talks.filter((talk) =>
+			filteredTalks = filteredTalks.filter((talk) =>
 				talk.title.toLowerCase().includes(q) ||
 				talk.speaker.toLowerCase().includes(q)
 			);
@@ -87,27 +246,27 @@
 
 		// Apply tag filter
 		if (tags.length > 0) {
-			talks = talks.filter((talk) => tags.includes(talk.tag));
+			filteredTalks = filteredTalks.filter((talk) => tags.includes(talk.tag));
 		}
 
-		const talkItems = talks.map((talk) => ({ type: 'talk' as const, time: talk.time, data: talk }));
+		const talkItems = filteredTalks.map((talk) => ({ type: 'talk' as const, time: talk.time, data: talk }));
 
 		// Only show breaks if no search/filter active
-		const breaks = hasFilter ? [] : (scheduleData.breaks as BreakItem[]).map((b) => ({
+		const breakItems = hasFilter ? [] : breaks.map((b) => ({
 			type: 'break' as const,
 			time: b.time,
 			data: b
 		}));
 
-		const combined = [...talkItems, ...breaks];
+		const combined = [...talkItems, ...breakItems];
 		combined.sort((a, b) => a.time.localeCompare(b.time));
 
 		return combined;
 	}
 
 	// Get track name by ID
-	function getTrackName(trackId: number): string {
-		const track = scheduleData.tracks.find(t => t.id === trackId);
+	function getTrackName(trackId: string | number): string {
+		const track = tracks.find(t => t.id === trackId);
 		return track?.name || '';
 	}
 
@@ -116,7 +275,7 @@
 
 	let schedule = $derived(getSchedule(selectedTrack, searchQuery, selectedTags));
 
-	function handleTrackSelect(trackId: number) {
+	function handleTrackSelect(trackId: string | number) {
 		selectedTrack = trackId;
 	}
 
@@ -133,11 +292,66 @@
 		selectedTags = [];
 	}
 
-	onMount(() => {
-		// Simulate loading (replace with actual API call)
-		setTimeout(() => {
-			isLoading = false;
-		}, 300);
+	onMount(async () => {
+		try {
+			const response = await fetch(API_URL);
+			if (response.ok) {
+				const data = await response.json();
+
+				// Fetch tracks
+				const apiTracks: ApiTrack[] = data.schedule?.tracks || [];
+				if (apiTracks.length > 0) {
+					tracks = apiTracks
+						.sort((a, b) => a.sort_order - b.sort_order)
+						.map((track) => ({
+							id: track.id,
+							name: track.name
+						}));
+					selectedTrack = tracks[0].id;
+
+					// Fetch and transform schedule slots
+					const apiSlots: ApiSlot[] = data.schedule?.slots || [];
+					const transformed = transformApiData(apiSlots, apiTracks);
+					talks = transformed.talks;
+					breaks = transformed.breaks;
+				} else {
+					// Fallback to static data
+					tracks = scheduleData.tracks;
+					selectedTrack = tracks[0]?.id || 1;
+					talks = scheduleData.talks as Talk[];
+					breaks = scheduleData.breaks as BreakItem[];
+				}
+
+				// Fetch sponsor ads
+				const sponsors: ApiSponsor[] = data.sponsors || [];
+				sponsorAds = sponsors
+					.filter((sponsor) => sponsor.has_advert && sponsor.advert)
+					.map((sponsor) => ({
+						id: sponsor.id,
+						name: sponsor.name,
+						tier: sponsor.sponsorship_type,
+						logo: sponsor.logo_url,
+						message: sponsor.advert!.headline,
+						fullMessage: sponsor.advert!.body,
+						image: sponsor.advert!.image_url,
+						url: sponsor.advert!.link_url
+					}));
+			} else {
+				// Fallback to static data
+				tracks = scheduleData.tracks;
+				selectedTrack = tracks[0]?.id || 1;
+				talks = scheduleData.talks as Talk[];
+				breaks = scheduleData.breaks as BreakItem[];
+			}
+		} catch (error) {
+			console.error('Failed to fetch data from API:', error);
+			tracks = scheduleData.tracks;
+			selectedTrack = tracks[0]?.id || 1;
+			talks = scheduleData.talks as Talk[];
+			breaks = scheduleData.breaks as BreakItem[];
+		}
+
+		isLoading = false;
 	});
 </script>
 
@@ -146,11 +360,13 @@
 </svelte:head>
 
 <div class="schedule-page">
-	<TrackSelector
-		tracks={scheduleData.tracks}
-		{selectedTrack}
-		onSelect={handleTrackSelect}
-	/>
+	{#if tracks.length > 0}
+		<TrackSelector
+			{tracks}
+			{selectedTrack}
+			onSelect={handleTrackSelect}
+		/>
+	{/if}
 
 	<!-- Search and Filter Bar -->
 	<div class="filter-bar">
@@ -194,13 +410,13 @@
 		</div>
 	{/if}
 
-	<SponsorToast ads={adsData.ads} duration={8000} delayBetween={15000} />
+	<SponsorToast ads={sponsorAds.length > 0 ? sponsorAds : adsData.ads} duration={8000} delayBetween={15000} />
 
 	<div
 		class="schedule-content"
 		role="tabpanel"
 		id="track-panel-{selectedTrack}"
-		aria-label="{scheduleData.tracks.find(t => t.id === selectedTrack)?.name} schedule"
+		aria-label="{tracks.find(t => t.id === selectedTrack)?.name} schedule"
 	>
 		{#if isLoading}
 			<!-- Loading State -->

@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import SpeakerCard from '$lib/components/SpeakerCard.svelte';
 	import speakersData from '$lib/data/speakers.json';
+
+	const API_URL = '/api/copia/events/rust-nation-uk-2026';
 
 	interface Social {
 		twitter?: string;
@@ -10,7 +13,7 @@
 	}
 
 	interface Speaker {
-		id: number;
+		id: string | number;
 		name: string;
 		photo?: string;
 		title?: string;
@@ -19,10 +22,54 @@
 		social?: Social;
 	}
 
-	const speakers = speakersData.speakers as Speaker[];
+	interface ApiSpeaker {
+		id: string;
+		full_name: string;
+		job_title: string | null;
+		organisation: string | null;
+		headshot_url: string | null;
+		bio: string | null;
+		linkedin_url: string | null;
+		twitter_handle: string | null;
+		website: string | null;
+	}
+
+	let speakers = $state<Speaker[]>(speakersData.speakers as Speaker[]);
+	let isLoading = $state(true);
+
+	onMount(async () => {
+		try {
+			const response = await fetch(API_URL);
+			if (response.ok) {
+				const data = await response.json();
+				const apiSpeakers: ApiSpeaker[] = data.speakers || [];
+
+				if (apiSpeakers.length > 0) {
+					speakers = apiSpeakers.map((s) => ({
+						id: s.id,
+						name: s.full_name,
+						photo: s.headshot_url || undefined,
+						title: s.job_title || undefined,
+						company: s.organisation || undefined,
+						bio: s.bio || undefined,
+						social: {
+							twitter: s.twitter_handle?.replace('@', '') || undefined,
+							linkedin: s.linkedin_url || undefined,
+							website: s.website || undefined
+						}
+					}));
+				}
+			}
+		} catch (error) {
+			console.error('Failed to fetch speakers:', error);
+		}
+		isLoading = false;
+	});
 
 	// Get unique companies for filter dropdown
-	const companies = [...new Set(speakers.map((s) => s.company).filter(Boolean))].sort() as string[];
+	let companies = $derived(
+		[...new Set(speakers.map((s) => s.company).filter(Boolean))].sort() as string[]
+	);
 
 	let searchQuery = $state('');
 	let selectedCompany = $state('');

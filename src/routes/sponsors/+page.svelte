@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import SponsorCard from '$lib/components/SponsorCard.svelte';
 	import sponsorsData from '$lib/data/sponsors.json';
 
+	const API_URL = '/api/copia/events/rust-nation-uk-2026';
+
 	interface Sponsor {
-		id: number;
+		id: string | number;
 		name: string;
 		tier: string;
 		logo: string;
@@ -11,22 +14,78 @@
 		bio: string;
 	}
 
-	const tierOrder = ['platinum', 'gold', 'silver', 'bronze'];
+	interface ApiSponsor {
+		id: string;
+		name: string;
+		sponsorship_type: string;
+		logo_url: string;
+		website_url: string;
+		bio: string | null;
+		sort_order: number;
+	}
 
-	function groupByTier(sponsors: Sponsor[]): Map<string, Sponsor[]> {
+	let sponsors = $state<Sponsor[]>([]);
+	let isLoading = $state(true);
+
+	onMount(async () => {
+		try {
+			const response = await fetch(API_URL);
+			if (response.ok) {
+				const data = await response.json();
+				const apiSponsors: ApiSponsor[] = data.sponsors || [];
+
+				sponsors = apiSponsors
+					.sort((a, b) => a.sort_order - b.sort_order)
+					.map((s) => ({
+						id: s.id,
+						name: s.name,
+						tier: s.sponsorship_type.toLowerCase(),
+						logo: s.logo_url,
+						website: s.website_url,
+						bio: s.bio || ''
+					}));
+			} else {
+				// Fallback to static data if API fails
+				sponsors = sponsorsData.sponsors as Sponsor[];
+			}
+		} catch (error) {
+			console.error('Failed to fetch sponsors:', error);
+			// Fallback to static data on error
+			sponsors = sponsorsData.sponsors as Sponsor[];
+		}
+		isLoading = false;
+	});
+
+	function groupByTier(sponsorList: Sponsor[]): Map<string, Sponsor[]> {
 		const grouped = new Map<string, Sponsor[]>();
 
-		for (const tier of tierOrder) {
-			const tierSponsors = sponsors.filter((s) => s.tier === tier);
-			if (tierSponsors.length > 0) {
-				grouped.set(tier, tierSponsors);
+		// Group all sponsors by their tier
+		for (const sponsor of sponsorList) {
+			const tier = sponsor.tier.toLowerCase();
+			if (!grouped.has(tier)) {
+				grouped.set(tier, []);
 			}
+			grouped.get(tier)!.push(sponsor);
 		}
 
 		return grouped;
 	}
 
-	const sponsorsByTier = groupByTier(sponsorsData.sponsors as Sponsor[]);
+	let sponsorsByTier = $derived(groupByTier(sponsors));
+
+	// Order tiers: known tiers first in priority order, then any custom tiers alphabetically
+	const knownTierOrder = ['platinum', 'gold', 'silver', 'bronze'];
+	let tierOrder = $derived.by(() => {
+		const tiers = [...sponsorsByTier.keys()];
+		return tiers.sort((a, b) => {
+			const aIndex = knownTierOrder.indexOf(a.toLowerCase());
+			const bIndex = knownTierOrder.indexOf(b.toLowerCase());
+			if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+			if (aIndex !== -1) return -1;
+			if (bIndex !== -1) return 1;
+			return a.localeCompare(b);
+		});
+	});
 </script>
 
 <svelte:head>
@@ -42,20 +101,31 @@
 	</div>
 
 	<div class="sponsors-content">
-		{#each tierOrder as tier}
-			{#if sponsorsByTier.has(tier)}
-				<section class="tier-section" aria-labelledby="tier-{tier}">
-					<h2 id="tier-{tier}" class="tier-title tier-title--{tier}">
-						{tier.charAt(0).toUpperCase() + tier.slice(1)} Sponsors
-					</h2>
-					<div class="sponsors-grid sponsors-grid--{tier}">
-						{#each sponsorsByTier.get(tier) || [] as sponsor (sponsor.id)}
-							<SponsorCard {sponsor} />
-						{/each}
-					</div>
-				</section>
-			{/if}
-		{/each}
+		{#if isLoading}
+			<div class="loading-state">
+				<div class="loading-spinner"></div>
+				<p>Loading sponsors...</p>
+			</div>
+		{:else if sponsors.length === 0}
+			<div class="empty-state">
+				<p>No sponsors available yet.</p>
+			</div>
+		{:else}
+			{#each tierOrder as tier}
+				{#if sponsorsByTier.has(tier)}
+					<section class="tier-section" aria-labelledby="tier-{tier}">
+						<h2 id="tier-{tier}" class="tier-title tier-title--{tier}">
+							{tier.charAt(0).toUpperCase() + tier.slice(1)} Sponsors
+						</h2>
+						<div class="sponsors-grid sponsors-grid--{tier}">
+							{#each sponsorsByTier.get(tier) || [] as sponsor (sponsor.id)}
+								<SponsorCard {sponsor} />
+							{/each}
+						</div>
+					</section>
+				{/if}
+			{/each}
+		{/if}
 	</div>
 </div>
 
@@ -119,6 +189,33 @@
 
 	.tier-title--bronze {
 		border-color: #CD7F32;
+	}
+
+	.loading-state,
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: var(--space-2xl);
+		color: var(--color-text-muted);
+		text-align: center;
+	}
+
+	.loading-spinner {
+		width: 40px;
+		height: 40px;
+		border: 3px solid var(--color-gray-200);
+		border-top-color: var(--color-primary);
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+		margin-bottom: var(--space-md);
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.sponsors-grid {
