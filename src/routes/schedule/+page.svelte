@@ -7,7 +7,9 @@
 	import scheduleData from '$lib/data/schedule.json';
 	import adsData from '$lib/data/ads.json';
 
-	const API_URL = '/api/copia/events/rust-nation-uk-2026';
+	const API_URL = import.meta.env.DEV
+		? '/api/copia/events/rust-nation-uk-2026'
+		: 'https://manage.copiaevents.com/api/public/events/rust-nation-uk-2026';
 
 	// API Types
 	interface ApiSponsor {

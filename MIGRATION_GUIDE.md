@@ -133,9 +133,15 @@ Add a visual hint that the toast is clickable. Inside the toast content area, ad
 
 ### 4.1 API URL Constant
 
+Use the proxy in dev, direct URL in production:
+
 ```typescript
-const API_URL = '/api/copia/events/YOUR-EVENT-SLUG';
+const API_URL = import.meta.env.DEV
+	? '/api/copia/events/YOUR-EVENT-SLUG'
+	: 'https://manage.copiaevents.com/api/public/events/YOUR-EVENT-SLUG';
 ```
+
+**Note:** The production API must have CORS enabled (`Access-Control-Allow-Origin: *`).
 
 ### 4.2 API Type Definitions
 

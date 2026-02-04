@@ -3,7 +3,9 @@
 	import SponsorCard from '$lib/components/SponsorCard.svelte';
 	import sponsorsData from '$lib/data/sponsors.json';
 
-	const API_URL = '/api/copia/events/rust-nation-uk-2026';
+	const API_URL = import.meta.env.DEV
+		? '/api/copia/events/rust-nation-uk-2026'
+		: 'https://manage.copiaevents.com/api/public/events/rust-nation-uk-2026';
 
 	interface Sponsor {
 		id: string | number;
