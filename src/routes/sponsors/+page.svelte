@@ -76,7 +76,7 @@
 	let sponsorsByTier = $derived(groupByTier(sponsors));
 
 	// Order tiers: known tiers first in priority order, then any custom tiers alphabetically
-	const knownTierOrder = ['platinum', 'recruitment', 'track', 'delegate lounge sponsor', 'gold', 'silver', 'community partner'];
+	const knownTierOrder = ['platinum', 'track', 'delegate lounge sponsor', 'recruitment', 'video', 'gold', 'silver', 'community partner'];
 	let tierOrder = $derived.by(() => {
 		const tiers = [...sponsorsByTier.keys()];
 		return tiers.sort((a, b) => {
@@ -247,13 +247,13 @@
 			flex-wrap: wrap;
 			gap: var(--space-lg);
 			align-items: flex-start;
-			max-width: 1100px;
+			justify-content: center;
+			max-width: 1200px;
 		}
 
 		.tier-section {
 			flex: 0 0 auto;
 			margin-bottom: 0;
-			max-width: calc(33.333% * 3);
 		}
 
 		.sponsors-grid {
