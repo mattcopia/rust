@@ -247,11 +247,17 @@
 			flex-wrap: wrap;
 			gap: var(--space-lg);
 			align-items: flex-start;
+			max-width: 1100px;
 		}
 
 		.tier-section {
 			flex: 0 0 auto;
 			margin-bottom: 0;
+			max-width: calc(33.333% * 3);
+		}
+
+		.sponsors-grid {
+			max-width: calc(320px * 3 + var(--space-md) * 2);
 		}
 
 		.sponsors-grid > :global(*) {
