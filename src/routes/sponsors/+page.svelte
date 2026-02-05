@@ -76,7 +76,7 @@
 	let sponsorsByTier = $derived(groupByTier(sponsors));
 
 	// Order tiers: known tiers first in priority order, then any custom tiers alphabetically
-	const knownTierOrder = ['platinum', 'track', 'recruitment', 'video', 'delegate lounge sponsor', 'gold', 'silver', 'community partner'];
+	const knownTierOrder = ['platinum', 'track', 'recruitment sponsor', 'video sponsor', 'delegate lounge sponsor', 'gold', 'silver', 'community partner'];
 	let tierOrder = $derived.by(() => {
 		const tiers = [...sponsorsByTier.keys()];
 		return tiers.sort((a, b) => {
